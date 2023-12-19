@@ -11,7 +11,7 @@ class MapEditer : public Window::EventHandler {
 		switch (msg)
 		{
 		case WM_CREATE: {
-			HTile = (HBITMAP)LoadImage(GetModuleHandle(nullptr), FName, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
+			HTile = (HBITMAP)LoadImage(GetModuleHandle(nullptr), FName2, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
 			BITMAP B = { 0, };
 			GetObject(HTile, sizeof(BITMAP), &B);
 			Child.W = B.bmWidth;
@@ -51,9 +51,7 @@ class MapEditer : public Window::EventHandler {
 		case WM_PAINT:
 		{
 			HBRUSH HB = CreateSolidBrush(RGB(0x0,0x0,0x0));
-			UINT XC = Child.W / TileX;
-			UINT YC = Child.H / TileY;
-			
+
 			PAINTSTRUCT PS = { 0, };
 			HDC h = BeginPaint(hWnd, &PS);
 			HGDIOBJ R = SelectObject(h, HB);
