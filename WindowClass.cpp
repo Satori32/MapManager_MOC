@@ -10,6 +10,7 @@ Window::Window() {
 Window::~Window() {
 
 }
+//extern HWND DLGBOX;
 
 bool Window::Create(HINSTANCE hInstance, TCHAR class_name[MAX_LOADSTRING], TCHAR app_name[MAX_LOADSTRING], int width, int height) {
 	WNDCLASSEX wcex;
@@ -85,6 +86,7 @@ void Window::SetTitle(const TCHAR title[MAX_LOADSTRING]) {
 WPARAM Window::GetMessageLoop(UINT wMsgFilterMin, UINT wMsgFilterMax) {
 	MSG msg;
 	while (::GetMessage(&msg, nullptr, wMsgFilterMin, wMsgFilterMax) > 0) {  //u-1v‚ª•Ô‚Á‚Ä‚­‚é‚©‚à‚µ‚ê‚È‚¢‚Ì‚Å‚±‚¤‚·‚é
+		//if (IsDialogMessage(DLGBOX, &msg)) continue;
 		::TranslateMessage(&msg);
 		::DispatchMessage(&msg);
 	}

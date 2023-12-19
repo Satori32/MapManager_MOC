@@ -7,6 +7,8 @@
 
 //https://qiita.com/seekerkrt/items/2478c05c590c308146fd
 
+//extern HWND DLGBOX;
+
 class Window {
 public:
 	class EventHandler;

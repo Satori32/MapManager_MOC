@@ -3,26 +3,106 @@
 #include <algorithm>
 #include <vector>
 #include "WindowClass.h"
-
+/** /
+	INT_PTR CALLBACK DP(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+		switch (msg) {
+		case WM_CLOSE:
+			EndDialog(hwnd, IDOK);
+			//DLGBOX = NULL;
+			return TRUE;
+		}
+		return FALSE;
+	}
+	/**/
 class MapEditer : public Window::EventHandler {
+
 //public:
 	LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
-
+		int TextH = 24;
+		int TextW = 48;
 		switch (msg)
 		{
 		case WM_CREATE: {
-			HTile = (HBITMAP)LoadImage(GetModuleHandle(nullptr), FName2, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
+
+			OPENFILENAME ofn;       // common dialog box structure
+			TCHAR szFile[260] = { 0 };       // if using TCHAR macros
+
+			// Initialize OPENFILENAME
+			ZeroMemory(&ofn, sizeof(ofn));
+			ofn.lStructSize = sizeof(ofn);
+			ofn.hwndOwner = hWnd;
+			ofn.lpstrFile = szFile;
+			ofn.nMaxFile = sizeof(szFile);
+			ofn.lpstrFilter = _T("All\0*.*\0BITMAP\0*.bmp\0");
+			ofn.nFilterIndex = 1;
+			ofn.lpstrFileTitle = NULL;
+			ofn.nMaxFileTitle = 0;
+			ofn.lpstrInitialDir = NULL;
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+			if (GetOpenFileName(&ofn) == TRUE)
+			{
+				HTile = (HBITMAP)LoadImage(GetModuleHandle(nullptr), ofn.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
+				// use ofn.lpstrFile
+			}
+			else {
+				PostQuitMessage(WM_QUIT);
+				return 0;
+			}
+/** /
+			DialogBox(
+				(HINSTANCE)GetModuleHandle(nullptr),
+				TEXT("KITTY"), hWnd, DP
+		);
+/**/
+			E1 = CreateWindow(
+				TEXT("EDIT"), TEXT("32"),
+				WS_CHILD | WS_VISIBLE | WS_BORDER,
+				0, 0, TextW, TextH, hWnd, (HMENU)1,
+				((LPCREATESTRUCT)(lp))->hInstance, NULL
+			);
+			E2 = CreateWindow(
+				TEXT("EDIT"), TEXT("32"),
+				WS_CHILD | WS_VISIBLE | WS_BORDER,
+				TextW, 0, TextW, TextH, hWnd, (HMENU)2,
+				((LPCREATESTRUCT)(lp))->hInstance, NULL
+			);
+			B1 = CreateWindow(
+				TEXT("BUTTON"), TEXT("ReSize"),
+				WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
+				TextW*2, 0, TextW*2, TextH,
+				hWnd,(HMENU) 3,((LPCREATESTRUCT)(lp))->hInstance, NULL
+			);
 			BITMAP B = { 0, };
 			GetObject(HTile, sizeof(BITMAP), &B);
 			Child.W = B.bmWidth;
 			Child.H = B.bmHeight;
 			Child.X = 64;
 			Child.Y = 64;
-			WMAX = 640 / TileX;
-			HMAX = 640 / TileY;
+			WMAX = 8; // 640 / TileX;
+			HMAX = 8; // 640 / TileY;
 			Tiles.resize(WMAX*HMAX);
 			break;
 		}
+		case WM_COMMAND:
+			switch (LOWORD(wp))	{
+			case 3:
+				if (HIWORD(wp) == BN_CLICKED) {
+					CHAR X[1024] = { 0, };
+					UINT V = 0;
+					GetWindowTextA(E1, X, 1024);;
+					WMAX = atoi(X);
+					GetWindowTextA(E2, X, 1024);;
+					HMAX= atoi(X);
+					Tiles.resize(0);
+					Tiles.resize(WMAX*HMAX);
+					InvalidateRect(hWnd, nullptr, TRUE);
+				}
+				break;
+			default:
+				break;
+			}
+			return 0;
 		case WM_RBUTTONDOWN: {
 			UINT X = GET_X_LPARAM(lp);
 			UINT Y = GET_Y_LPARAM(lp);
@@ -42,7 +122,9 @@ class MapEditer : public Window::EventHandler {
 			}
 			else {
 				int Pos = (Y / TileY) * WMAX + (X / TileX);
-				Tiles[Pos] = ST;
+				if (Pos < Tiles.size()) {
+					Tiles[Pos] = ST;
+				}
 			}
 			InvalidateRect(hWnd, nullptr, TRUE);
 			break;
@@ -87,7 +169,7 @@ class MapEditer : public Window::EventHandler {
 			return DefWindowProc(hWnd, msg, wp, lp);
 			break;
 		}
-		return 0;
+		return 1;
 	
 
 	}
@@ -111,8 +193,8 @@ protected:
 	}
 protected:
 	HBITMAP HTile = nullptr;
-	TCHAR FName[32] = _T("Tile.bmp");
-	TCHAR FName2[32] = _T("Tile2.bmp");
+//	TCHAR FName[32] = _T("Tile.bmp");
+//	TCHAR FName2[32] = _T("Tile2.bmp");
 	R<int> Child = {0,0,128,128};
 	UINT TileY = 32;//Pixel
 	UINT TileX = 32;//Pixel
@@ -120,4 +202,8 @@ protected:
 	UINT HMAX = 128;
 	std::vector<std::uint16_t> Tiles;
 	UINT ST = 0;
+//	HWND hdlg = nullptr;
+	HWND E1 = nullptr;
+	HWND E2 = nullptr;
+	HWND B1 = nullptr;
 };

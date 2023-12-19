@@ -1,7 +1,10 @@
 ﻿#include <Windows.h>
 
+
+
 #include "WindowClass.h"
 #include "WindowHandler.h"
+
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
