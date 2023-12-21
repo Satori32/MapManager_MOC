@@ -68,10 +68,28 @@ class MapEditer : public Window::EventHandler {
 				((LPCREATESTRUCT)(lp))->hInstance, NULL
 			);
 			B1 = CreateWindow(
-				TEXT("BUTTON"), TEXT("ReSize"),
+				TEXT("BUTTON"), TEXT("MapSize"),
 				WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
 				TextW*2, 0, TextW*2, TextH,
 				hWnd,(HMENU) 3,((LPCREATESTRUCT)(lp))->hInstance, NULL
+			);
+			E3 = CreateWindow(
+				TEXT("EDIT"), TEXT("32"),
+				WS_CHILD | WS_VISIBLE | WS_BORDER,
+				TextW*4, 0, TextW, TextH, hWnd, (HMENU)4,
+				((LPCREATESTRUCT)(lp))->hInstance, NULL
+			);
+			E4 = CreateWindow(
+				TEXT("EDIT"), TEXT("32"),
+				WS_CHILD | WS_VISIBLE | WS_BORDER,
+				TextW*5, 0, TextW, TextH, hWnd, (HMENU)5,
+				((LPCREATESTRUCT)(lp))->hInstance, NULL
+			);
+			B2 = CreateWindow(
+				TEXT("BUTTON"), TEXT("TileSize"),
+				WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
+				TextW*6, 0, TextW*2, TextH,
+				hWnd,(HMENU) 6,((LPCREATESTRUCT)(lp))->hInstance, NULL
 			);
 			BITMAP B = { 0, };
 			GetObject(HTile, sizeof(BITMAP), &B);
@@ -84,6 +102,29 @@ class MapEditer : public Window::EventHandler {
 			Tiles.resize(WMAX*HMAX);
 			break;
 		}
+		case WM_KEYDOWN:
+			if (wp == VK_SPACE) {
+				BOOL F = IsWindowVisible(E1);
+				if (F == TRUE) {
+					ShowWindow(E1,SW_HIDE);
+					ShowWindow(E2,SW_HIDE);
+					ShowWindow(B1,SW_HIDE);
+					ShowWindow(E3,SW_HIDE);
+					ShowWindow(E4,SW_HIDE);
+					ShowWindow(B2,SW_HIDE);
+					F = FALSE;
+				}
+				else {
+					ShowWindow(E1,SW_SHOW);
+					ShowWindow(E2,SW_SHOW);
+					ShowWindow(B1,SW_SHOW);
+					ShowWindow(E3,SW_SHOW);
+					ShowWindow(E4,SW_SHOW);
+					ShowWindow(B2,SW_SHOW);
+					F = TRUE;
+				}
+			}
+			break;
 		case WM_COMMAND:
 			switch (LOWORD(wp))	{
 			case 3:
@@ -96,6 +137,18 @@ class MapEditer : public Window::EventHandler {
 					HMAX= atoi(X);
 					Tiles.resize(0);
 					Tiles.resize(WMAX*HMAX);
+					InvalidateRect(hWnd, nullptr, TRUE);
+				}
+				break;
+			case 6:
+				if (HIWORD(wp) == BN_CLICKED) {
+					CHAR X[1024] = { 0, };
+					UINT V = 0;
+					GetWindowTextA(E3, X, 1024);;
+					TileX = atoi(X);
+					GetWindowTextA(E4, X, 1024);;
+					TileY= atoi(X);
+
 					InvalidateRect(hWnd, nullptr, TRUE);
 				}
 				break;
@@ -206,4 +259,7 @@ protected:
 	HWND E1 = nullptr;
 	HWND E2 = nullptr;
 	HWND B1 = nullptr;
+	HWND E3 = nullptr;
+	HWND E4 = nullptr;
+	HWND B2 = nullptr;
 };
