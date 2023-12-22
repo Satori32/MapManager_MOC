@@ -141,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="MapManager？？？.ico" />
+    <Image Include="MapTip2.bmp" />
     <Image Include="small.ico" />
     <Image Include="Tile.bmp" />
     <Image Include="Tile2.bmp" />

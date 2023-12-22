@@ -33,7 +33,7 @@ class MapEditer : public Window::EventHandler {
 			ofn.hwndOwner = hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = _T("All\0*.*\0BITMAP\0*.bmp\0");
+			ofn.lpstrFilter = _T("BITMAP\0*.bmp\0All\0*.*\0");
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -100,6 +100,7 @@ class MapEditer : public Window::EventHandler {
 			WMAX = 8; // 640 / TileX;
 			HMAX = 8; // 640 / TileY;
 			Tiles.resize(WMAX*HMAX);
+			F = false;
 			break;
 		}
 		case WM_KEYDOWN:
@@ -156,6 +157,10 @@ class MapEditer : public Window::EventHandler {
 				break;
 			}
 			return 0;
+		case WM_LBUTTONUP: {
+			InvalidateRect(hWnd, nullptr, TRUE);
+			break;
+		}
 		case WM_RBUTTONDOWN: {
 			UINT X = GET_X_LPARAM(lp);
 			UINT Y = GET_Y_LPARAM(lp);
@@ -165,6 +170,26 @@ class MapEditer : public Window::EventHandler {
 			InvalidateRect(hWnd, nullptr, TRUE);
 			break;
 		}
+		case WM_MOUSEMOVE: {
+			UINT X = GET_X_LPARAM(lp)/TileX;
+			UINT Y = GET_Y_LPARAM(lp)/TileY;
+			if (!F) {
+				FXB = X;
+				FYB = Y;
+			}
+			if (wp == MK_LBUTTON) {
+				if (InR(X, Y) == true) { break; }
+				F = true;
+				P.x = X;
+				P.y = Y;	
+				InvalidateRect(hWnd, nullptr, TRUE);
+				
+			}
+			else {
+				F = false;
+			}
+		}
+			break;
 		case WM_LBUTTONDOWN: {
 			UINT X = GET_X_LPARAM(lp);
 			UINT Y = GET_Y_LPARAM(lp);
@@ -186,17 +211,22 @@ class MapEditer : public Window::EventHandler {
 		case WM_PAINT:
 		{
 			HBRUSH HB = CreateSolidBrush(RGB(0x0,0x0,0x0));
-
+			
+			XF = (FXB-P.x );//TileX;
+			YF = (FYB-P.y);// TileY;
+			if (XF < 0) { XF = 0; }
+			if (YF < 0) { YF = 0; }
+			
 			PAINTSTRUCT PS = { 0, };
 			HDC h = BeginPaint(hWnd, &PS);
 			HGDIOBJ R = SelectObject(h, HB);
 			HDC hc = CreateCompatibleDC(h);
 			HGDIOBJ Rc = SelectObject(hc, HTile);
 
-			for (int i = 0; i < HMAX; i++) {
-				for (int j = 0; j < WMAX; j++) {
+			for (int i = (YF); i < HMAX; i++) {
+				for (int j = (XF); j < WMAX; j++) {
 					int S = Tiles[i * WMAX + j];
-					auto F = BitBlt(h, TileX * j, TileY * i, TileX, TileY, hc, (S % WMAX) * TileX, (S / HMAX) * TileY, SRCCOPY);
+					auto F = BitBlt(h, (TileX * (j-XF)), (TileY * (i-YF)), TileX, TileY, hc, ((S % WMAX)) * TileX, ((S / HMAX)) * TileY, SRCCOPY);
 				}
 			}
 			Rectangle(h, Child.X-1, Child.Y-1, Child.X + Child.W+1,Child.Y+ Child.H+1);
@@ -249,12 +279,18 @@ protected:
 //	TCHAR FName[32] = _T("Tile.bmp");
 //	TCHAR FName2[32] = _T("Tile2.bmp");
 	R<int> Child = {0,0,128,128};
-	UINT TileY = 32;//Pixel
-	UINT TileX = 32;//Pixel
+	INT TileY = 32;//Pixel
+	INT TileX = 32;//Pixel
 	UINT WMAX = 128;
 	UINT HMAX = 128;
 	std::vector<std::uint16_t> Tiles;
 	UINT ST = 0;
+	int FXB = 0;
+	int FYB = 0;
+	bool F = false;
+	int XF = 0;
+	int YF = 0;
+	POINT P{};
 //	HWND hdlg = nullptr;
 	HWND E1 = nullptr;
 	HWND E2 = nullptr;
